@@ -1,0 +1,289 @@
+Index: DeepDreamGUI.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<module type=\"JAVA_MODULE\" version=\"4\">\n  <component name=\"FacetManager\">\n    <facet type=\"Python\" name=\"Python\">\n      <configuration sdkName=\"Python 3.9 (DVProject)\" />\n    </facet>\n  </component>\n  <component name=\"NewModuleRootManager\" inherit-compiler-output=\"true\">\n    <exclude-output />\n    <content url=\"file://$MODULE_DIR$\">\n      <sourceFolder url=\"file://$MODULE_DIR$\" isTestSource=\"false\" />\n    </content>\n    <orderEntry type=\"inheritedJdk\" />\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\n    <orderEntry type=\"library\" name=\"Python 3.9 (DVProject) interpreter library\" level=\"application\" />\n  </component>\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DeepDreamGUI.iml b/DeepDreamGUI.iml
+--- a/DeepDreamGUI.iml	(revision faab0e831dd708f369afa4b42e2f84fbde62fa0c)
++++ b/DeepDreamGUI.iml	(date 1652987236763)
+@@ -5,13 +5,12 @@
+       <configuration sdkName="Python 3.9 (DVProject)" />
+     </facet>
+   </component>
+-  <component name="NewModuleRootManager" inherit-compiler-output="true">
++  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_14" inherit-compiler-output="true">
+     <exclude-output />
+     <content url="file://$MODULE_DIR$">
+       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+     </content>
+     <orderEntry type="inheritedJdk" />
+     <orderEntry type="sourceFolder" forTests="false" />
+-    <orderEntry type="library" name="Python 3.9 (DVProject) interpreter library" level="application" />
+   </component>
+ </module>
+\ No newline at end of file
+Index: OpenFileGUI.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import java.beans.PropertyChangeEvent;\nimport java.beans.PropertyChangeListener;\nimport java.io.*;\nimport java.net.URI;\nimport java.net.URISyntaxException;\nimport java.net.URL;\nimport java.nio.file.*;\nimport javax.imageio.ImageIO;\nimport java.awt.*;\nimport java.awt.image.BufferedImage;\nimport java.awt.event.*;\nimport javax.swing.*;\nimport javax.swing.filechooser.FileNameExtensionFilter;\nimport java.lang.Math;\n\npublic class OpenFileGUI extends JFrame {\n    private String baseImage;\n    private static String openImage;\n    private JFrame appWindow;\n    public static JPanel imageSpace;\n    public static JButton dreamButton;\n    private JButton resetButton;\n    private JComboBox<String> styleSelect;\n    private JComboBox<String> layer1Select;\n    private JComboBox<String> layer2Select;\n    public static String depth = \"-4\";\n    public static JProgressBar dreamProgress;\n    private static BufferedImage drawImage;\n    private static boolean flag;\n    protected File output;\n    private JLabel layerLabel;\n    private JLabel styleLabel;\n    private JCheckBoxMenuItem advancedItem;\n\n    public static void main(String[] args) { \n        new OpenFileGUI().setupGUI();\n    }\n\n    private void setupGUI() {\n\t\t\n        // create app window\n        appWindow = new JFrame(\"DeepDreamer\");\n        appWindow.setLayout(new BorderLayout());\n        appWindow.setMinimumSize(new Dimension(700, 700));\n        appWindow.setLocationRelativeTo(null); // centers window\n\n        // create menu bar\n        JMenuBar menuBar = new JMenuBar();\n        menuBar.setBorderPainted(false); // disables white outline\n        menuBar.setBackground(Color.decode(\"#152232\"));\n        \n        // file options\n        JMenu fileMenu = new JMenu(\"File\");\n        fileMenu.setFont(new Font(\"Sans\", Font.BOLD, 12));\n        JMenuItem openItem = new JMenuItem(\"Open File...\");\n        JMenuItem urlItem = new JMenuItem(\"Open URL...\");\n        JMenuItem saveItem = new JMenuItem(\"Save as...\");\n        fileMenu.setForeground(Color.decode(\"#d3d5f3\"));\n        fileMenu.add(openItem);\n        fileMenu.add(urlItem);\n        fileMenu.add(saveItem);\n\n        // advanced settings\n        JMenu settingsMenu = new JMenu (\"Settings\");\n        settingsMenu.setFont(new Font(\"Sans\", Font.BOLD, 12));\n        advancedItem = new JCheckBoxMenuItem(\"Advanced options\");\n        settingsMenu.setForeground(Color.decode(\"#d3d5f3\"));\n        settingsMenu.add(advancedItem);\n\n        // get help\n        JMenu helpMenu = new JMenu(\"Help\");\n        helpMenu.setFont(new Font(\"Sans\", Font.BOLD, 12));\n        JMenuItem infoItem = new JMenuItem(\"How it Works\");\n        helpMenu.setForeground(Color.decode(\"#d3d5f3\"));\n        helpMenu.add(infoItem);\n        \n        // add to menu bar\n        menuBar.add(fileMenu);\n        menuBar.add(settingsMenu);\n        menuBar.add(helpMenu);\n        menuBar.add(Box.createVerticalStrut(30));\n\n        // add to app window\n        appWindow.add(menuBar, BorderLayout.NORTH);\n        \n        // create image space\n        imageSpace = new JPanel(new BorderLayout());\n        imageSpace.setBackground(Color.decode(\"#0b1622\"));\n        appWindow.add(imageSpace, BorderLayout.CENTER);\n        \n        // --- USER OPTIONS ---\n        // create options\n        JPanel userOptions = new JPanel();\n        userOptions.setBackground(Color.decode(\"#151f2e\"));\n        userOptions.add(Box.createVerticalStrut(60));\n        appWindow.add(userOptions, BorderLayout.SOUTH);\n\n\n        // style selection\n        styleLabel = new JLabel(\"Style\");\n        styleLabel.setFont(new Font(\"Sans\", Font.PLAIN, 14));\n        styleLabel.setForeground(Color.decode(\"#d3d5f3\"));\n        styleSelect = new JComboBox<String>(new String[] {\"Glitch\", \"Disease\", \"Electric\"});\n        styleSelect.setPreferredSize(new Dimension(90, 30));\n        styleSelect.setFont(new Font(\"Sans\", Font.BOLD, 14));\n        userOptions.add(styleLabel);\n        userOptions.add(styleSelect);\n\n        // layer selection\n        layerLabel = new JLabel(\"Layers\");\n        layerLabel.setFont(new Font(\"Sans\", Font.PLAIN, 14));\n        layerLabel.setForeground(Color.decode(\"#d3d5f3\"));\n\n        String[] layerOptions = {\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"};\n        layer1Select = new JComboBox<String>(layerOptions);\n        layer1Select.setPreferredSize(new Dimension(45, 30));\n        layer1Select.setFont(new Font(\"Sans\", Font.BOLD, 14));\n        layer1Select.setSelectedIndex(9);\n        layer2Select = new JComboBox<String>(layerOptions);\n        layer2Select.setPreferredSize(new Dimension(45, 30));\n        layer2Select.setFont(new Font(\"Sans\", Font.BOLD, 14));\n        layer2Select.setSelectedIndex(6);\n        layer2Select.add(Box.createHorizontalStrut(4));\n        \n        userOptions.add(layerLabel);\n        userOptions.add(layer1Select);\n        userOptions.add(layer2Select);\n        layerLabel.setVisible(false);\n        layer1Select.setVisible(false);\n        layer2Select.setVisible(false);\n\n        // dreamify button\n        userOptions.add(Box.createHorizontalStrut(4));\n        dreamButton = new JButton(\"Dreamify\");\n        dreamButton.setPreferredSize(new Dimension(100, 30));\n        dreamButton.setFont(new Font(\"Sans\", Font.BOLD, 14));\n        dreamButton.setEnabled(false);\n        userOptions.add(dreamButton);\n        dreamButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));\n        \n        // reset button\n        userOptions.add(Box.createHorizontalStrut(4));\n        resetButton = new JButton(\"Reset\");\n        resetButton.setPreferredSize(new Dimension(100, 30));\n        resetButton.setFont(new Font(\"Sans\", Font.BOLD, 14));\n        resetButton.setEnabled(false);\n        userOptions.add(resetButton);\n        dreamButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));\n        // --- END USER OPTIONS ---\n\n        appWindow.setVisible(true);\n        \n        // listeners\n        openItem.setActionCommand(\"open\");\n        openItem.addActionListener(new ButtonClickListener());\n        urlItem.setActionCommand(\"url\");\n        urlItem.addActionListener(new ButtonClickListener());\n        saveItem.setActionCommand(\"save\");\n        saveItem.addActionListener(new ButtonClickListener());\n        advancedItem.setActionCommand(\"advanced\");\n        advancedItem.addActionListener(new ButtonClickListener());\n        infoItem.setActionCommand(\"infoItem\");\n        infoItem.addActionListener(new ButtonClickListener());\n        dreamButton.setActionCommand(\"dream\");\n        dreamButton.addActionListener(new ButtonClickListener());\n        resetButton.setActionCommand(\"reset\");\n        resetButton.addActionListener(new ButtonClickListener());\n        styleSelect.setActionCommand(\"style\");\n        styleSelect.addActionListener(new ButtonClickListener());\n        layer1Select.setActionCommand(\"layer\");\n        layer1Select.addActionListener(new ButtonClickListener());\n        layer2Select.setActionCommand(\"layer\");\n        layer2Select.addActionListener(new ButtonClickListener());\n\n        // end program when window closes\n        appWindow.addWindowListener(new WindowAdapter() {\n            public void windowClosing(WindowEvent event) {\n               System.exit(0);\n            }        \n         }); \n    }\n\n    private int checkIfInteger(String output) {\n        try {\n            return Integer.parseInt(output);\n        }\n        catch (NumberFormatException nfe) {\n            return -1;\n        }\n    }\n\n    private void checkFileLength(String fileName, double sizeThreshhold) {\n        File file = new File(fileName);\n        double bytes = file.length();\n        double kilobytes = (bytes / 1024);\n        //if file exceeds this size, warning will be issued\n        if (kilobytes > sizeThreshhold) JOptionPane.showMessageDialog(appWindow, \"This is a large file, dreamification may take a while\");\n        return;\n    }\n\n    private void openFile() {\n        // create window to select a jpg or png file\n        JFileChooser chooseFile = new JFileChooser(System.getProperty(\"user.dir\"));\n        chooseFile.setAcceptAllFileFilterUsed(false);\n        chooseFile.addChoosableFileFilter(new FileNameExtensionFilter(\"JPG file\", \"jpg\",\"jfif\",\"pjpeg\", \"pjp\"));\n        chooseFile.addChoosableFileFilter(new FileNameExtensionFilter(\"PNG file\", \"png\"));\n\n        if (chooseFile.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {\n            baseImage = chooseFile.getSelectedFile().toString();\n            if (baseImage.equals(openImage)) return;\n            //warn user if file is large\n            checkFileLength(baseImage,120.0);\n            setImage(baseImage);\n        }\n    }\n    \n    private void setImage(String imagePath) {    \n        // don't set image if already set\n        if (openImage != null && openImage.equals(imagePath)) {\n            return;\n        }\n\n        flag = true; \n        openImage = imagePath; \n            \n        ImageLoader imageLoader = new ImageLoader();\n        imageLoader.execute();\n\n        // buttons should be usable now that image exists\n        dreamButton.setEnabled(true);\n        styleSelect.setEnabled(true);\n        layer1Select.setEnabled(true);\n        layer2Select.setEnabled(true);\n        \n        appWindow.addComponentListener(new ComponentAdapter( ) {\n            public void componentResized(ComponentEvent ev) {\n                if (dreamProgress != null)\n                    OpenFileGUI.imageSpace.revalidate();\n                else\n                    loadImage();\n            }\n        });\n    }\n\n    public static void loadImage() {\n        // if new image is being set\n        if (flag) {\n            try {\n                drawImage = ImageIO.read(new File(OpenFileGUI.openImage));\n            } catch (Exception fileNotFound) {\n                JOptionPane.showMessageDialog(null, \"File not found.\", \"Error\", JOptionPane.ERROR_MESSAGE);\n            }\n        }\n\n        // get image resolution based on window size\n        double drawRatio = 0;\n        if (((double)drawImage.getWidth() - imageSpace.getWidth()) > ((double)drawImage.getHeight() - imageSpace.getHeight())) {\n            drawRatio = (double)imageSpace.getWidth() / drawImage.getWidth();\n        } else {\n            drawRatio = (double)imageSpace.getHeight() / drawImage.getHeight();\n        }\n        BufferedImage drawCanvas = new BufferedImage((int)(drawImage.getWidth()*drawRatio), (int)(drawImage.getHeight()*drawRatio), BufferedImage.TYPE_INT_RGB);\n        \n        // load image\n        Graphics2D draw = drawCanvas.createGraphics();\n        draw.drawImage(drawImage, 0, 0, (int)(drawImage.getWidth()*drawRatio), (int)(drawImage.getHeight()*drawRatio), null);\n        draw.dispose();\n        ImageIcon imageIcon = new ImageIcon(drawCanvas);\n\n        // update image space\n        imageSpace.removeAll();\n        imageSpace.add(new JLabel(imageIcon));\n        imageSpace.revalidate();\n        \n        flag = false;\n    }\n\n    private static void openinfoItem() {\n        try {\n            Desktop.getDesktop().browse(new URI(\"https://ai.googleblog.com/2015/06/inceptionism-going-deeper-into-neural.html\"));\n        } catch (URISyntaxException | IOException e) {\n            throw new RuntimeException(e);\n        }\n    }\n\n    private static void saveImage(File output) {\n       JFileChooser fileChooser = new JFileChooser();\n       fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);\n       fileChooser.setAcceptAllFileFilterUsed(false);\n       fileChooser.addChoosableFileFilter(new FileNameExtensionFilter(\"PNG file\", \"png\"));\n       fileChooser.addChoosableFileFilter(new FileNameExtensionFilter(\"JPG file\", \"jpg\"));\n\n       if (fileChooser.showSaveDialog(imageSpace) == JFileChooser.APPROVE_OPTION) {\n           File fileToSave = fileChooser.getSelectedFile();\n           String name = fileToSave.toString();\n\n           if (!name.endsWith(\"png\") && fileChooser.getFileFilter().getDescription().equals(\"PNG\")) {\n               name += \".png\";\n               save(\"png\", name, output);\n           }\n           else if (!name.endsWith(\"jpg\") && fileChooser.getFileFilter().getDescription().equals(\"JPG\")) {\n               name += \".jpg\";\n               save(\"jpg\", name, output);\n           }\n           else if (fileChooser.getFileFilter().getDescription().equals(\"JPG\")){\n               save(\"jpg\", name, output);\n           }\n           else {\n               save(\"png\", name, output);\n           }\n       }\n    }\n\n    private static void save(String type, String name, File output)\n    {\n        try {\n            BufferedImage img = ImageIO.read(output);\n            ImageIO.write(img, type, new File(name));\n        } catch (IOException e) {\n            throw new RuntimeException(e);\n        }\n    }\n\n    private class ButtonClickListener implements ActionListener{\n        public void actionPerformed(ActionEvent e) {\n            String command = e.getActionCommand();\n            switch(command) {\n                case (\"open\"):\n                    openFile();\n                    break;\n                case (\"url\"):\n                    try {\n                        // get image from url\n                        String url = JOptionPane.showInputDialog(appWindow, \"\", \"Enter a URL that ends in .jpg\", JOptionPane.PLAIN_MESSAGE);\n                        if (url != null) {\n                            String[] split = url.split(\"/\");\n                            String fileName = split[split.length - 1];\n                            InputStream inputStream = new URL(url).openStream() ;\n                            File directory = new File(\"./input/\");\n                            if (!directory.exists()){\n                                directory.mkdir();\n                            }\n                            Path path = Paths.get(\"./input/\" + fileName);\n                            if (!Files.exists(path)) {\n                                Files.copy(inputStream, Paths.get(\"./input/\" + fileName));\n                            }\n                            baseImage = \"./input/\" + fileName;\n                            //warn user if file is large\n                            checkFileLength(baseImage,120.0);\n                            setImage(baseImage);\n                        }\n                    } catch (IOException notValidImage) {\n                        JOptionPane.showMessageDialog(appWindow, \"Invalid image url!\", \"Error 303\", JOptionPane.ERROR_MESSAGE);\n                    }\n                    break;\n                case (\"save\"):\n                    if (output != null) {\n                        saveImage(output);\n                    }else {\n                        break;\n                    }\n                case (\"advanced\"):\n                    if (advancedItem.isSelected()) {\n                        layerLabel.setVisible(true);\n                        layer1Select.setVisible(true);\n                        layer2Select.setVisible(true);\n                        styleSelect.addItem(\"Custom\");\n                    } else {\n                        if (styleSelect.getSelectedItem() == \"Custom\") {\n                            styleSelect.setSelectedItem(\"Glitch\");\n                            layer1Select.setSelectedIndex(9);\n                            layer2Select.setSelectedIndex(6);\n                        }\n                        layerLabel.setVisible(false);\n                        layer1Select.setVisible(false);\n                        layer2Select.setVisible(false);\n                        styleSelect.removeItem(\"Custom\");\n                    }\n                    break;\n                case (\"infoItem\"):\n                    openinfoItem();\n                    break;\n                case (\"dream\"):\n                    DreamWorker dw = new DreamWorker();\n                    dw.addPropertyChangeListener(new PropertyChangeListener() {\n                        @Override\n                        public void propertyChange(PropertyChangeEvent evt) {\n                            if (\"progress\".equals(evt.getPropertyName())) {\n                                // do progress bar stuff\n                            }\n                        }\n                    });\n                    dw.execute();\n                    break;\n                case (\"reset\"):\n\n                    setImage(baseImage);\n                    break;\n                case (\"style\"):\n                    if ((styleSelect.getSelectedItem()).equals(\"Glitch\")) {\n                        layer1Select.setSelectedIndex(9);\n                        layer2Select.setSelectedIndex(6);\n                    }\n                    else if ((styleSelect.getSelectedItem()).equals(\"Disease\")) {\n                        layer1Select.setSelectedIndex(8);\n                        layer2Select.setSelectedIndex(9);\n                    }\n                    else if ((styleSelect.getSelectedItem()).equals(\"Electric\")) {\n                        layer1Select.setSelectedIndex(8);\n                        layer2Select.setSelectedIndex(1);\n                    }\n                    break;\n                case (\"layer\"):\n                    if (layer1Select.getSelectedIndex() == 9) {\n                        if (layer2Select.getSelectedIndex() == 6) {\n                            styleSelect.setSelectedItem(\"Glitch\");\n                            break;\n                        }\n                    } else if (layer1Select.getSelectedIndex() == 8) {\n                        if (layer2Select.getSelectedIndex() == 9) {\n                            styleSelect.setSelectedItem(\"Disease\");\n                            break;\n                        } else if (layer2Select.getSelectedIndex() == 1) {\n                            styleSelect.setSelectedItem(\"Electric\");\n                            break;\n                        }\n                    }\n                    styleSelect.setSelectedItem(\"Custom\");\n                    break;\n                }\n            }\n        }\n\n    class DreamWorker extends SwingWorker<Void, Void> {\n        @Override\n        protected Void doInBackground() throws Exception {\n            \n            OpenFileGUI.dreamButton.setEnabled(false);\n            \n            // create progress bar\n            DreamProgress dp = new DreamProgress();\n            dp.execute();\n\n            // run dream\n            // get layers from selection\n            String layer1 = String.valueOf(Integer.parseInt(layer1Select.getSelectedItem().toString())-1);\n            String layer2 = String.valueOf(Integer.parseInt(layer2Select.getSelectedItem().toString())-1);\n\n            // start python script with file path and layers as arguments\n            ProcessBuilder startProcess;\n\n            String os = System.getProperty(\"os.name\");\n            if (os.contains(\"Windows\"))\n                startProcess = new ProcessBuilder(\"python\", System.getProperty(\"user.dir\") + \"\\\\main.py\", openImage, layer1, layer2, depth);\n            else\n                startProcess = new ProcessBuilder(\"python3\", System.getProperty(\"user.dir\") + \"\\\\main.py\", openImage, layer1, layer2, depth);\n\n            try {\n                Process pythonScript = startProcess.start();\n                // read output from script for image file path\n                BufferedReader debugging = new BufferedReader(new InputStreamReader(pythonScript.getInputStream()));\n\n                String pythonOutput = null;\n                while((pythonOutput = debugging.readLine()) != null) {\n                    if (pythonOutput.contains(\"&&&\")) {\n                        String dreamImage = pythonOutput.substring(3);\n                        setImage(\"./output/\" + dreamImage);\n                        OpenFileGUI.dreamButton.setEnabled(true);\n                        output = new File(\"./output/\" + dreamImage);\n                        resetButton.setEnabled(true);\n                        break;\n                    }\n                    else {\n                        int output;\n                        if ((output = checkIfInteger(pythonOutput)) > 0) {\n                            dreamProgress.setValue(output);\n                        }\n                    }\n                }\n\n            } catch (IOException noScript) {\n                JOptionPane.showMessageDialog(appWindow, \"Python script failed!\", \"Error 117\", JOptionPane.ERROR_MESSAGE);\n            }\n\n            dreamProgress = null;\n\n            return null;\n        }\n\n        @Override\n        protected void done() {\n            super.done();\n        }\n    }\n}\n\nclass ImageLoader extends SwingWorker<Void, Void> {\n    @Override\n    protected Void doInBackground() throws Exception {\n        // add loading image text\n        OpenFileGUI.imageSpace.removeAll();\n        JLabel imageLoading = new JLabel(\"Loading image...\", SwingConstants.CENTER);\n        imageLoading.setFont(new Font(\"Sans\", Font.BOLD, 20));\n        imageLoading.setForeground(Color.decode(\"#d3d5f3\"));\n        OpenFileGUI.imageSpace.add(imageLoading);\n        OpenFileGUI.imageSpace.revalidate();\n        return null;\n    }\n\n    @Override // only start loading image after loading text is displayed\n    protected void done() {\n        OpenFileGUI.loadImage();\n    }\n}\n\nclass DreamProgress extends SwingWorker<Void, Void> {\n    @Override\n    protected Void doInBackground() throws Exception {\n        \n        int max = Math.abs((Integer.parseInt(OpenFileGUI.depth) - 1) * 100);\n        \n        OpenFileGUI.dreamProgress = new JProgressBar(0, max);\n        OpenFileGUI.dreamProgress.setValue(0);\n        OpenFileGUI.dreamProgress.setStringPainted(true);\n        OpenFileGUI.dreamProgress.setString(\"Dreamifying image...\");\n        OpenFileGUI.dreamProgress.setFont(new Font(\"Sans\", Font.BOLD, 20));\n\n        OpenFileGUI.dreamProgress.setBackground(Color.decode(\"#0b1622\"));\n        OpenFileGUI.dreamProgress.setForeground(Color.decode(\"#3db4f2\"));\n        OpenFileGUI.dreamProgress.setBorderPainted(false);\n\n        OpenFileGUI.imageSpace.removeAll();\n        OpenFileGUI.imageSpace.add(OpenFileGUI.dreamProgress);\n        OpenFileGUI.imageSpace.revalidate();\n\n        return null;\n    }\n\n    @Override\n    protected void done() {\n        super.done();\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/OpenFileGUI.java b/OpenFileGUI.java
+--- a/OpenFileGUI.java	(revision faab0e831dd708f369afa4b42e2f84fbde62fa0c)
++++ b/OpenFileGUI.java	(date 1652990367898)
+@@ -31,13 +31,20 @@
+     private JLabel layerLabel;
+     private JLabel styleLabel;
+     private JCheckBoxMenuItem advancedItem;
+-
+-    public static void main(String[] args) { 
++    private JMenuBar menuBar;
++    private JPanel userOptions;
++    JMenu settingsMenu;
++    JMenu helpMenu;
++    JMenu fileMenu;
++    Color light;
++    Color dark;
++    public static void main(String[] args)  {
+         new OpenFileGUI().setupGUI();
+     }
+ 
+     private void setupGUI() {
+-		
++        light = Color.decode("#EEE0CB");
++        dark = Color.decode("#1C2321");
+         // create app window
+         appWindow = new JFrame("DeepDreamer");
+         appWindow.setLayout(new BorderLayout());
+@@ -45,12 +52,12 @@
+         appWindow.setLocationRelativeTo(null); // centers window
+ 
+         // create menu bar
+-        JMenuBar menuBar = new JMenuBar();
++        menuBar = new JMenuBar();
+         menuBar.setBorderPainted(false); // disables white outline
+-        menuBar.setBackground(Color.decode("#152232"));
+-        
++        menuBar.setBorderPainted(false); // disables white outline
++
+         // file options
+-        JMenu fileMenu = new JMenu("File");
++        fileMenu = new JMenu("File");
+         fileMenu.setFont(new Font("Sans", Font.BOLD, 12));
+         JMenuItem openItem = new JMenuItem("Open File...");
+         JMenuItem urlItem = new JMenuItem("Open URL...");
+@@ -61,19 +68,19 @@
+         fileMenu.add(saveItem);
+ 
+         // advanced settings
+-        JMenu settingsMenu = new JMenu ("Settings");
++        settingsMenu = new JMenu ("Settings");
+         settingsMenu.setFont(new Font("Sans", Font.BOLD, 12));
+         advancedItem = new JCheckBoxMenuItem("Advanced options");
+         settingsMenu.setForeground(Color.decode("#d3d5f3"));
+         settingsMenu.add(advancedItem);
+ 
+         // get help
+-        JMenu helpMenu = new JMenu("Help");
++        helpMenu = new JMenu("Help");
+         helpMenu.setFont(new Font("Sans", Font.BOLD, 12));
+         JMenuItem infoItem = new JMenuItem("How it Works");
+         helpMenu.setForeground(Color.decode("#d3d5f3"));
+         helpMenu.add(infoItem);
+-        
++
+         // add to menu bar
+         menuBar.add(fileMenu);
+         menuBar.add(settingsMenu);
+@@ -82,24 +89,23 @@
+ 
+         // add to app window
+         appWindow.add(menuBar, BorderLayout.NORTH);
+-        
++
+         // create image space
+         imageSpace = new JPanel(new BorderLayout());
+-        imageSpace.setBackground(Color.decode("#0b1622"));
+         appWindow.add(imageSpace, BorderLayout.CENTER);
+-        
++
+         // --- USER OPTIONS ---
+         // create options
+-        JPanel userOptions = new JPanel();
++        userOptions = new JPanel();
+         userOptions.setBackground(Color.decode("#151f2e"));
+         userOptions.add(Box.createVerticalStrut(60));
+         appWindow.add(userOptions, BorderLayout.SOUTH);
++        userOptions.setBackground(Color.decode("#f4dbed"));
+ 
+ 
+         // style selection
+         styleLabel = new JLabel("Style");
+         styleLabel.setFont(new Font("Sans", Font.PLAIN, 14));
+-        styleLabel.setForeground(Color.decode("#d3d5f3"));
+         styleSelect = new JComboBox<String>(new String[] {"Glitch", "Disease", "Electric"});
+         styleSelect.setPreferredSize(new Dimension(90, 30));
+         styleSelect.setFont(new Font("Sans", Font.BOLD, 14));
+@@ -109,7 +115,6 @@
+         // layer selection
+         layerLabel = new JLabel("Layers");
+         layerLabel.setFont(new Font("Sans", Font.PLAIN, 14));
+-        layerLabel.setForeground(Color.decode("#d3d5f3"));
+ 
+         String[] layerOptions = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+         layer1Select = new JComboBox<String>(layerOptions);
+@@ -121,7 +126,7 @@
+         layer2Select.setFont(new Font("Sans", Font.BOLD, 14));
+         layer2Select.setSelectedIndex(6);
+         layer2Select.add(Box.createHorizontalStrut(4));
+-        
++
+         userOptions.add(layerLabel);
+         userOptions.add(layer1Select);
+         userOptions.add(layer2Select);
+@@ -137,7 +142,6 @@
+         dreamButton.setEnabled(false);
+         userOptions.add(dreamButton);
+         dreamButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+-        
+         // reset button
+         userOptions.add(Box.createHorizontalStrut(4));
+         resetButton = new JButton("Reset");
+@@ -147,9 +151,9 @@
+         userOptions.add(resetButton);
+         dreamButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+         // --- END USER OPTIONS ---
+-
++        setStyle("Dark");
+         appWindow.setVisible(true);
+-        
++
+         // listeners
+         openItem.setActionCommand("open");
+         openItem.addActionListener(new ButtonClickListener());
+@@ -176,8 +180,8 @@
+         appWindow.addWindowListener(new WindowAdapter() {
+             public void windowClosing(WindowEvent event) {
+                System.exit(0);
+-            }        
+-         }); 
++            }
++         });
+     }
+ 
+     private int checkIfInteger(String output) {
+@@ -188,6 +192,27 @@
+             return -1;
+         }
+     }
++    private void setStyle(String argument) {
++        switch(argument){
++            case("Light"):
++
++                break;
++            case("Dark"):
++                imageSpace.setBackground(dark);
++                menuBar.setBackground(dark);
++                appWindow.setBackground(dark);
++                userOptions.setBackground(dark);
++                dreamButton.setBackground(light);
++                layer1Select.setBackground(light);
++                layer2Select.setBackground(light);
++                styleSelect.setBackground(light);
++                styleSelect.setForeground(Color.black);
++                resetButton.setBackground(light);
++                layerLabel.setForeground(light);
++                styleLabel.setForeground(light);
++                break;
++        }
++    }
+ 
+     private void checkFileLength(String fileName, double sizeThreshhold) {
+         File file = new File(fileName);
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_16\" project-jdk-name=\"openjdk-17\" project-jdk-type=\"JavaSDK\">\n    <output url=\"file://$PROJECT_DIR$/out\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision faab0e831dd708f369afa4b42e2f84fbde62fa0c)
++++ b/.idea/misc.xml	(date 1652987161274)
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_16" project-jdk-name="openjdk-17" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" project-jdk-name="openjdk-17" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/out" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: out/production/DeepDreamGUI/.idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_16\" project-jdk-name=\"openjdk-17\" project-jdk-type=\"JavaSDK\">\n    <output url=\"file://$PROJECT_DIR$/out\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/out/production/DeepDreamGUI/.idea/misc.xml b/out/production/DeepDreamGUI/.idea/misc.xml
+--- a/out/production/DeepDreamGUI/.idea/misc.xml	(revision faab0e831dd708f369afa4b42e2f84fbde62fa0c)
++++ b/out/production/DeepDreamGUI/.idea/misc.xml	(date 1652987162622)
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_16" project-jdk-name="openjdk-17" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" project-jdk-name="openjdk-17" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/out" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: .idea/compiler.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+new file mode 100644
+--- /dev/null	(date 1652986660986)
++++ b/.idea/compiler.xml	(date 1652986660986)
+@@ -0,0 +1,9 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="CompilerConfiguration">
++    <option name="DEFAULT_COMPILER" value="Eclipse" />
++    <bytecodeTargetLevel target="15">
++      <module name="DeepDreamGUI" target="" />
++    </bytecodeTargetLevel>
++  </component>
++</project>
+\ No newline at end of file
+Index: out/production/DeepDreamGUI/DeepDreamGUI.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<module type=\"JAVA_MODULE\" version=\"4\">\n  <component name=\"FacetManager\">\n    <facet type=\"Python\" name=\"Python\">\n      <configuration sdkName=\"Python 3.9 (DVProject)\" />\n    </facet>\n  </component>\n  <component name=\"NewModuleRootManager\" inherit-compiler-output=\"true\">\n    <exclude-output />\n    <content url=\"file://$MODULE_DIR$\">\n      <sourceFolder url=\"file://$MODULE_DIR$\" isTestSource=\"false\" />\n    </content>\n    <orderEntry type=\"inheritedJdk\" />\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\n    <orderEntry type=\"library\" name=\"Python 3.9 (DVProject) interpreter library\" level=\"application\" />\n  </component>\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/out/production/DeepDreamGUI/DeepDreamGUI.iml b/out/production/DeepDreamGUI/DeepDreamGUI.iml
+--- a/out/production/DeepDreamGUI/DeepDreamGUI.iml	(revision faab0e831dd708f369afa4b42e2f84fbde62fa0c)
++++ b/out/production/DeepDreamGUI/DeepDreamGUI.iml	(date 1652987237959)
+@@ -5,13 +5,12 @@
+       <configuration sdkName="Python 3.9 (DVProject)" />
+     </facet>
+   </component>
+-  <component name="NewModuleRootManager" inherit-compiler-output="true">
++  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_14" inherit-compiler-output="true">
+     <exclude-output />
+     <content url="file://$MODULE_DIR$">
+       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+     </content>
+     <orderEntry type="inheritedJdk" />
+     <orderEntry type="sourceFolder" forTests="false" />
+-    <orderEntry type="library" name="Python 3.9 (DVProject) interpreter library" level="application" />
+   </component>
+ </module>
+\ No newline at end of file
